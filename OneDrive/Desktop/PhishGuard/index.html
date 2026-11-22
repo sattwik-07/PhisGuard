@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="PhishGuard — AI-powered phishing URL detector. Analyses 29 URL features instantly. 100% client-side, no data leaves your browser." />
+  <meta name="theme-color" content="#0a0c10" />
+
+  <!-- Open Graph -->
+  <meta property="og:title"       content="PhishGuard — AI Phishing URL Detector" />
+  <meta property="og:description" content="Detect phishing URLs instantly using 29 AI-extracted features. Free, client-side, no sign-up." />
+  <meta property="og:type"        content="website" />
+
+  <title>PhishGuard — AI Phishing URL Detector</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Inline favicon SVG -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>" />
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <div class="logo" aria-label="PhishGuard home">
+        <svg class="logo-shield" viewBox="0 0 24 24" fill="none"
+             xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 2L3 6.5V12c0 5.25 3.75 10.15 9 11.25
+                   C17.25 22.15 21 17.25 21 12V6.5L12 2z"
+                fill="#58a6ff" fill-opacity="0.15"
+                stroke="#58a6ff" stroke-width="1.5"
+                stroke-linejoin="round"/>
+          <path d="M9 12l2 2 4-4" stroke="#58a6ff"
+                stroke-width="1.8" stroke-linecap="round"
+                stroke-linejoin="round"/>
+        </svg>
+        PhishGuard
+      </div>
+
+      <div class="mode-badge mode-heuristic" id="modeBadge"
+           aria-live="polite" aria-label="Detection mode">
+        ⚙️ Heuristic Mode
+      </div>
+    </div>
+  </header>
+
+  <main role="main">
+
+    <!-- ── Hero / Input ─────────────────────────────────────────────────── -->
+    <section class="hero" aria-labelledby="heroTitle">
+      <h1 class="hero-title" id="heroTitle">
+        Detect Phishing URLs<br/>Instantly
+      </h1>
+      <p class="hero-subtitle">
+        AI-powered analysis using 29 URL features.
+        100% client-side — your URLs never leave your browser.
+      </p>
+
+      <div class="input-group" role="search">
+        <div class="url-wrapper">
+          <span class="url-icon" aria-hidden="true">🔗</span>
+          <input
+            type="text"
+            id="urlInput"
+            placeholder="https://example.com/page?ref=abc"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            aria-label="URL to analyse"
+            aria-describedby="errorMsg"
+            maxlength="2048"
+          />
+          <button class="clear-btn"
+                  id="clearBtn"
+                  type="button"
+                  aria-label="Clear URL input">✕</button>
+        </div>
+        <button class="analyze-btn"
+                id="analyzeBtn"
+                type="button"
+                aria-label="Analyse URL for phishing">
+          <span id="analyzeLoader" class="btn-loader" aria-hidden="true"></span>
+          <span class="btn-text">Analyse</span>
+          <span class="btn-arrow" aria-hidden="true">→</span>
+        </button>
+      </div>
+
+      <p class="error-msg" id="errorMsg" role="alert" aria-live="assertive"></p>
+
+      <!-- Example URLs -->
+      <div class="examples" aria-label="Example URLs">
+        <span class="examples-label">Try:</span>
+
+        <button class="example-chip safe-chip"
+                data-url="https://www.github.com"
+                type="button"
+                aria-label="Try legitimate URL: github.com">
+          ✅ github.com
+        </button>
+
+        <button class="example-chip safe-chip"
+                data-url="https://www.google.com/search?q=machine+learning"
+                type="button"
+                aria-label="Try legitimate URL: google.com search">
+          ✅ google.com/search
+        </button>
+
+        <button class="example-chip phishing-chip"
+                data-url="http://paypal-secure-login.verify-account.tk/update/confirm.php?session=abc123"
+                type="button"
+                aria-label="Try phishing URL example">
+          🚨 paypal-secure-login…
+        </button>
+
+        <button class="example-chip phishing-chip"
+                data-url="http://192.168.1.1/secure/account/login.php?verify=1&update=true"
+                type="button"
+                aria-label="Try IP-based phishing URL example">
+          🚨 192.168.1.1/login…
+        </button>
+      </div>
+    </section>
+
+    <!-- ── Results ───────────────────────────────────────────────────────── -->
+    <section class="results-section"
+             id="resultsSection"
+             aria-label="Analysis results"
+             aria-live="polite"
+             hidden>
+
+      <!-- Verdict card -->
+      <div class="verdict-card" role="region" aria-label="Verdict">
+        <!-- Circular gauge -->
+        <div class="gauge-wrap" aria-hidden="true">
+          <svg class="gauge-svg"
+               viewBox="0 0 180 180"
+               xmlns="http://www.w3.org/2000/svg">
+            <!-- Background ring -->
+            <circle class="gauge-bg-ring"
+                    cx="90" cy="90" r="72"/>
+            <!-- Fill ring -->
+            <circle class="gauge-fill-ring"
+                    id="gaugeFill"
+                    cx="90" cy="90" r="72"/>
+          </svg>
+          <!-- Center overlay -->
+          <div class="gauge-center">
+            <span id="gaugePercent">0%</span>
+            <span id="gaugeLabel">Score</span>
+          </div>
+        </div>
+
+        <!-- Text details -->
+        <div class="verdict-details">
+          <div class="verdict-badge safe" id="verdictBadge"
+               role="status" aria-live="polite">
+            ✅ SAFE
+          </div>
+
+          <div class="verdict-url" id="verdictUrl"
+               aria-label="Analysed URL"></div>
+
+          <div class="verdict-meta">
+            <span class="meta-chip" id="confidenceEl">Confidence: —</span>
+            <span class="meta-chip" id="modeTagEl">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature breakdown -->
+      <div role="region" aria-label="Feature breakdown">
+        <h2 class="section-title">Feature Analysis</h2>
+        <div class="features-grid" id="featuresGrid"
+             role="list"
+             aria-label="Individual URL features"></div>
+      </div>
+    </section>
+
+    <!-- ── History ───────────────────────────────────────────────────────── -->
+    <section class="history-section"
+             id="historySection"
+             aria-label="Analysis history"
+             style="display:none">
+      <div class="history-header">
+        <h2 class="section-title">Recent Analyses</h2>
+        <button class="clear-hist-btn"
+                id="clearHistoryBtn"
+                type="button"
+                aria-label="Clear analysis history">
+          Clear history
+        </button>
+      </div>
+      <div id="historyList" role="list"
+           aria-label="Previously analysed URLs"></div>
+    </section>
+
+  </main><!-- /main -->
+
+  <!-- ── Info strip ──────────────────────────────────────────────────────── -->
+  <div class="info-strip" role="complementary" aria-label="How it works">
+    <div class="info-item">
+      <span>🔐</span>
+      <span>Client-side only — no data sent to any server</span>
+    </div>
+    <div class="info-item">
+      <span>📊</span>
+      <span>29 lexical &amp; structural URL features</span>
+    </div>
+    <div class="info-item">
+      <span>⚡</span>
+      <span>Sub-millisecond inference</span>
+    </div>
+    <div class="info-item">
+      <span>📂</span>
+      <span>Trained on PhiUSIIL dataset — 377K URLs</span>
+    </div>
+  </div>
+
+  <!-- ── Footer ────────────────────────────────────────────────────────────── -->
+  <footer role="contentinfo">
+    <p>
+      Built by <strong>Sattwik Sahu</strong> &middot;
+      Dataset:
+      <a href="https://archive.ics.uci.edu/dataset/967/phiusiil+phishing+url+dataset"
+         target="_blank" rel="noopener noreferrer">
+        PhiUSIIL — UCI ML Repository
+      </a>
+      &middot;
+      <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+        View on GitHub
+      </a>
+    </p>
+    <p style="margin-top:6px;font-size:0.73rem;">
+      For educational purposes. Always verify suspicious URLs with multiple sources.
+    </p>
+  </footer>
+
+</div><!-- /#app -->
+
+<script src="js/features.js"></script>
+<script src="js/classifier.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
